@@ -38,21 +38,33 @@ function addEvents(nodeList){
 function manageInput(input){
     let display = document.querySelector(".display");    
     if(input=="C"){
+        allowDecimal=true;
         display.value="";
         userInput="";
     }
     else if(input=="<"||input=="Backspace"){
+        if(display.value[display.value.length-1]==".")allowDecimal=true;
         display.value = display.value.slice(0,display.value.length-1);
-        if(userInput[userInput.length-1].search(/\d/)==0)
+        if(userInput[userInput.length-1].search(/[\d\.]/)==0)
             userInput = userInput.slice(0,userInput.length-1);
         else userInput = userInput.slice(0,userInput.length-3);
+    }
+    else if(input=="."&&allowDecimal){
+        userInput+=input;
+        display.value+=input;
+        allowDecimal=false;
     }
     else if(input.search(/[\+\-\*/=]/)==0||input=="Enter"){
         if(display.value[display.value.length-1].search(/\d/)==0){
             if(input=="="||input=="Enter"){
                 calculate();
+                if(userInput.indexOf(".")==-1){
+                    allowDecimal=true;
+                }
+                else allowDecimal=false;
             }
             else{
+                allowDecimal=true;
                 userInput+=`,${input},`;
                 display.value+=input;
             }
@@ -97,6 +109,9 @@ addEvents(document.querySelectorAll(".digits div"));
 addEvents(document.querySelectorAll(".symbols div"));
 window.addEventListener('keydown',(e)=>{
     manageInput(e.key);
+    
 })
+
+let allowDecimal=true;
 
 let userInput = " ";
