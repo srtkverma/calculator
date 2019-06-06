@@ -27,29 +27,42 @@ function solve(a,b,c){
     }
 }
 
-function displayFiller(nodeList){
+function addEvents(nodeList){
     nodeList.forEach(element => {
-        if(element.getAttribute("class")=="equal"){
-            element.addEventListener('click',calculate);
-        }
-        else{
-            element.addEventListener('click',(e)=>{
-                let display = document.querySelector(".display");
-                let input = e.srcElement.innerText;
-                if(input=="CLEAR"){
-                    display.value="";
-                    userInput="";
-                }
-                else{
-                    if(input=='+'||input=='-'||input=='*'||input=='/'){
-                        userInput+=`,${input},`;
-                    }
-                    else userInput+=input;
-                    display.value+=input;
-                };
-            });
-        }
+        element.addEventListener('click',(e)=>{
+            manageInput(e.srcElement.innerText);
+        });
     });
+}
+
+function manageInput(input){
+    let display = document.querySelector(".display");    
+    if(input=="C"){
+        display.value="";
+        userInput="";
+    }
+    else if(input=="<"||input=="Backspace"){
+        display.value = display.value.slice(0,display.value.length-1);
+        if(userInput[userInput.length-1].search(/\d/)==0)
+            userInput = userInput.slice(0,userInput.length-1);
+        else userInput = userInput.slice(0,userInput.length-3);
+    }
+    else if(input.search(/[\+\-\*/=]/)==0||input=="Enter"){
+        if(display.value[display.value.length-1].search(/\d/)==0){
+            if(input=="="||input=="Enter"){
+                calculate();
+            }
+            else{
+                userInput+=`,${input},`;
+                display.value+=input;
+            }
+        }
+    }
+    else if(input.search(/\d/)==0) {
+        userInput+=input;
+        display.value+=input;
+    }
+    else return;
 }
 
 function calculate(){
@@ -66,8 +79,12 @@ function calculate(){
     while(userArray.indexOf("+")!=-1){
         userArray=operate("+",userArray);
     }
-    document.querySelector(".display").value = userArray;
     userInput = userArray.join("");
+    if(userInput==Infinity){
+        alert("Infinity");
+        userInput="";
+    }
+    document.querySelector(".display").value = userInput;
 }
 
 function operate(operator,input){
@@ -76,6 +93,10 @@ function operate(operator,input){
     return input;
 }
 
-displayFiller(document.querySelectorAll(".digits div"));
-displayFiller(document.querySelectorAll(".symbols div"));
-let userInput = "";
+addEvents(document.querySelectorAll(".digits div"));
+addEvents(document.querySelectorAll(".symbols div"));
+window.addEventListener('keydown',(e)=>{
+    manageInput(e.key);
+})
+
+let userInput = " ";
